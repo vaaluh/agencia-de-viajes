@@ -38,15 +38,14 @@ function generarNotificacion($mensaje, $tipo = "info") {
     </script>
     ';
 }
-?>
 
-<?php
+##paquetesturisticos
 $ofertasdeviajes = [
     [
         "destino" => "Santiago",
         "fecha" => "2025-01-10",
         "precio" => 140000,
-        "imagen" => "https://media.istockphoto.com/id/913781186/es/foto/horizonte-de-santiago-de-chile.jpg?s=2048x2048&w=is&k=20&c=0SFgsSqz11SC342qBr3Ouqq4fEdfm92yLmUZ_k2Jmeo=",
+        "imagen" => "https://media.istockphoto.com/id/913781186/es/foto/horizonte-de-santiago-de-chile.jpg",
         "hoteles" => ["Hotel Plaza Santiago", "Hotel Intercontinental"]
     ],
     [
@@ -60,7 +59,7 @@ $ofertasdeviajes = [
         "destino" => "Viña del Mar",
         "fecha" => "2025-01-11",
         "precio" => 120000,
-        "imagen" => "https://chile.tur.com/_next/image?url=https%3A%2F%2Fd6myp1633h7qr.cloudfront.net%2Fposts-assets%2Fb260221f-4c13-4ead-892d-3a9e9ab8d4a7.jpeg&w=1200&q=75",
+        "imagen" => "https://chile.tur.com/_next/image?url=https%3A%2F%2Fd6myp1633h7qr.cloudfront.net%2Fposts-assets%2Fb260221f-4c13-4ead-892d-3a9e9ab8d4a7.jpeg",
         "hoteles" => ["Hotel O'Higgins", "Hotel Enjoy", "Hotel San Martín"]
     ],
     [
@@ -69,23 +68,18 @@ $ofertasdeviajes = [
         "precio" => 170000,
         "imagen" => "https://viajexchile.com/wp-content/uploads/2017/11/1laserena.jpg",
         "hoteles" => ["Hotel Costa Real", "Hotel Francisco de Aguirre", "Hotel Canto del Mar"]
-    ],
-    [
-        "destino" => "Puerto Montt",
-        "fecha" => "2025-03-20",
-        "precio" => 180000,
-        "imagen" => "https://blog.trovit.cl/wp-content/uploads/2023/10/Puerto_Montt_5-1536x1152.jpeg",
-        "hoteles" => ["Hotel Puerto Montt", "Hotel Manquehue"]
-    ],
-    [
-        "destino" => "Cordillera de los Andes",
-        "fecha" => "2025-01-18",
-        "precio" => 450000,
-        "imagen" => "https://humanidades.com/wp-content/uploads/2016/09/cordillera-de-los-andes-e1560489279388.jpg",
-        "hoteles" => ["Lodge El Andino", "Hotel Cordillera Nevada"]
     ]
 ];
 
+##funcionvuelos
+$vuelos = [
+    ["origen"=>"Santiago","destino"=>"Valparaíso","fecha"=>"2025-01-10","precio"=>45000],
+    ["origen"=>"Santiago","destino"=>"Viña del Mar","fecha"=>"2025-01-11","precio"=>55000],
+    ["origen"=>"Santiago","destino"=>"La Serena","fecha"=>"2025-02-05","precio"=>85000],
+    ["origen"=>"Santiago","destino"=>"Puerto Montt","fecha"=>"2025-03-20","precio"=>95000]
+];
+
+##busquedapaquetes
 $resultados = [];
 
 if (isset($_GET['destino']) || isset($_GET['fecha'])) {
@@ -102,107 +96,121 @@ if (isset($_GET['destino']) || isset($_GET['fecha'])) {
         }
     }
 }
-?>
-<?php
-if (isset($_GET['destino']) && isset($_GET['fecha'])) {
 
-    
-    $destinoIngresado = $_GET['destino'];
-    $fechaIngresada = $_GET['fecha'];
+##busquedavuelos
+$resultadosVuelos = [];
 
-    echo "<p style='color:green; font-size:18px;'>
-             Planicacion de viaje registrada: <br>
-            <strong>Destino:</strong> $destinoIngresado <br>
-            <strong>Fecha:</strong> $fechaIngresada
-          </p>";
+if (isset($_GET['origen']) || isset($_GET['destino_vuelo']) || isset($_GET['fecha_vuelo'])) {
+
+    $origen = strtolower($_GET['origen'] ?? "");
+    $destinoVuelo = strtolower($_GET['destino_vuelo'] ?? "");
+    $fechaVuelo = $_GET['fecha_vuelo'] ?? "";
+
+    foreach ($vuelos as $vuelo) {
+        if (
+            (empty($origen) || strpos(strtolower($vuelo["origen"]), $origen) !== false) &&
+            (empty($destinoVuelo) || strpos(strtolower($vuelo["destino"]), $destinoVuelo) !== false) &&
+            (empty($fechaVuelo) || $fechaVuelo == $vuelo["fecha"])
+        ) {
+            $resultadosVuelos[] = $vuelo;
+        }
+    }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Agencia de Viajes con PHP</title>
+<title>Agencia de Viajes</title>
 
 <style>
-    body { font-family: Arial; }
-    .result {
-        border: 1px solid #ccc;
-        padding: 10px;
-        border-radius: 8px;
-        width: 250px;
-        margin: 10px;
-        display: inline-block;
-        vertical-align: top;
-    }
+body { font-family: Arial; }
+.result {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 8px;
+    width: 250px;
+    margin: 10px;
+    display: inline-block;
+    vertical-align: top;
+}
 </style>
 </head>
 
 <body>
 
-<?php
-generarNotificacion("🔥 ¡Oferta del día! 25% de descuento en vuelos nacionales", "exito");
-?>
+<?php generarNotificacion("🔥 ¡Oferta del día! 25% de descuento en vuelos nacionales", "exito"); ?>
 
 <h1 style="text-align:center; color:red;">Agencia de Viajes</h1>
 
+
+<h2>Paquetes Turísticos</h2>
+
 <form method="GET">
-
     <label>Destino:</label>
-    <input list="lista-destinos" name="destino" placeholder="Escribe un destino..."
-        value="<?php echo $_GET['destino'] ?? ""; ?>">
+    <input list="lista-destinos" name="destino" value="<?= htmlspecialchars($_GET['destino'] ?? "") ?>">
 
-    <datalist id="lista-destinos">
-        <option value="Santiago">
-        <option value="Valparaíso">
-        <option value="Viña del Mar">
-        <option value="La Serena">
-        <option value="Puerto Montt">
-        <option value="Cordillera de los Andes">
-    </datalist>
-
-    <br><br>
-
-    <label>Fecha de viaje:</label>
-    <input type="date" name="fecha" value="<?php echo $_GET['fecha'] ?? ""; ?>">
-
-    <br><br>
+    <label>Fecha:</label>
+    <input type="date" name="fecha" value="<?= htmlspecialchars($_GET['fecha'] ?? "") ?>">
 
     <button type="submit">Buscar</button>
-
 </form>
 
 <hr>
 
-<div id="results-container">
-
 <?php if (!empty($resultados)): ?>
-
     <?php foreach ($resultados as $r): ?>
         <div class="result">
-            <img src="<?= $r['imagen'] ?>" width="230" style="border-radius:8px;"><br><br>
-
+            <img src="<?= $r['imagen'] ?>" width="230"><br><br>
             <strong><?= $r['destino'] ?></strong><br>
             Fecha: <?= $r['fecha'] ?><br>
-            Precio: $<?= $r['precio'] ?><br><br>
-
-            <strong>Hoteles disponibles:</strong>
+            Precio: $<?= $r['precio'] ?><br>
             <ul>
                 <?php foreach ($r['hoteles'] as $h): ?>
                     <li><?= $h ?></li>
                 <?php endforeach; ?>
             </ul>
-
-            <button onclick="alert('Reserva generada con éxito')">Reservar</button>
+            <button onclick="alert('Paquete reservado con éxito')">Reservar</button>
         </div>
     <?php endforeach; ?>
-
-<?php elseif (isset($_GET['destino']) || isset($_GET['fecha'])): ?>
-
-    <p>No se encontraron resultados.</p>
-
 <?php endif; ?>
 
-</div>
+<hr>
+
+<h2>Vuelos</h2>
+
+<form method="GET">
+    <label>Origen:</label>
+    <input list="lista-destinos" name="origen">
+
+    <label>Destino:</label>
+    <input list="lista-destinos" name="destino_vuelo">
+
+    <label>Fecha:</label>
+    <input type="date" name="fecha_vuelo">
+
+    <button type="submit">Buscar vuelo</button>
+</form>
+
+<?php if (!empty($resultadosVuelos)): ?>
+    <?php foreach ($resultadosVuelos as $v): ?>
+        <div class="result">
+            <strong><?= $v['origen'] ?> → <?= $v['destino'] ?></strong><br>
+            Fecha: <?= $v['fecha'] ?><br>
+            Precio: $<?= $v['precio'] ?><br><br>
+            <button onclick="alert('Vuelo reservado con éxito')">Reservar vuelo</button>
+        </div>
+    <?php endforeach; ?>
+<?php endif; ?>
+
+<datalist id="lista-destinos">
+    <option value="Santiago">
+    <option value="Valparaíso">
+    <option value="Viña del Mar">
+    <option value="La Serena">
+    <option value="Puerto Montt">
+</datalist>
 
 </body>
 </html>
